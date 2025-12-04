@@ -189,11 +189,11 @@ export default function Home() {
           </div>
         )}
 
-        {/* Chart */}
-        <div className="bg-slate-900 rounded-2xl p-6 mb-12 shadow-2xl">
-          <h2 className="text-2xl font-bold mb-4 text-emerald-400">{selectedSymbol} - Live Chart</h2>
-          <div ref={chartContainerRef} />
-        </div>
+       {/* Chart */}
+<div id="chart-section" className="bg-slate-900 rounded-2xl p-6 mb-12 shadow-2xl">
+  <h2 className="text-2xl font-bold mb-4 text-emerald-400">{selectedSymbol} - Live Chart</h2>
+  <div ref={chartContainerRef} className="h-[500px]" />
+</div>
 
         {/* News */}
         <h2 className="text-3xl font-bold mb-8 text-emerald-400">Latest Market News</h2>
