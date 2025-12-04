@@ -130,16 +130,29 @@ export default function Home() {
   }, [selectedSymbol]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      {/* Live Ticker */}
-      <div className="bg-emerald-900 py-4 overflow-hidden">
-        <div className="animate-marquee whitespace-nowrap text-lg font-bold flex gap-10">
-          {tickers.length > 0 ? tickers.map((t, i) => (
-            <span key={i} className="text-white">
-              {t.symbol} <span className="text-emerald-300">${t.price.toFixed(2)}</span>
-            </span>
-          )) : "Loading live prices..."}
-        </div>
+   {/* CLICKABLE TICKER — FINAL WORKING VERSION */}
+<div className="bg-emerald-900 py-5 overflow-hidden cursor-pointer">
+  <div className="animate-marquee whitespace-nowrap inline-block">
+    {/* Duplicate for seamless loop */}
+    {[...tickers, ...tickers].map((t, i) => (
+      <button
+        key={`${t.symbol}-${i}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          setSelectedSymbol(t.symbol);
+          setSearchQuery('');
+          setSearchResults([]);
+          document.getElementById('chart-section')?.scrollIntoView({ behavior: 'smooth' });
+        }}
+        className="inline-block mx-8 px-6 py-3 bg-emerald-800/80 hover:bg-emerald-700 
+                   rounded-lg font-bold text-white shadow-md border border-emerald-600
+                   hover:scale-110 hover:shadow-xl transition-all duration-300"
+      >
+        {t.symbol} <span className="text-emerald-300 ml-2">${t.price.toFixed(2)}</span>
+      </button>
+    ))}
+  </div>
+</div>
       </div>
 
       <main className="max-w-7xl mx-auto p-6">
