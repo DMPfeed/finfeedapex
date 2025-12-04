@@ -9,9 +9,11 @@ const NEWSAPI_KEY = '0f520a239e1148e7ab44d666bbf690f6';
 export default function Home() {
   const [articles, setArticles] = useState<any[]>([]);
   const [tickers, setTickers] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');  // NEW: Search state
+  const [searchResults, setSearchResults] = useState<any[]>([]);  // NEW: Ticker search results
   const chartContainerRef = useRef<HTMLDivElement>(null);
 
-  // YOUR LIVE ALPACA PRICES (kept 100%)
+  // YOUR LIVE ALPACA PRICES (kept)
   useEffect(() => {
     const ws = new WebSocket('wss://stream.data.alpaca.markets/v2/sip');
     ws.onopen = () => {
@@ -30,14 +32,33 @@ export default function Home() {
     };
   }, []);
 
-  // YOUR LIVE NEWS (kept 100%)
+  // YOUR LIVE NEWS (kept)
   useEffect(() => {
     fetch(`https://newsapi.org/v2/everything?q=stocks+OR+earnings&domains=bloomberg.com,reuters.com,cnbc.com,wsj.com,benzinga.com&apiKey=${NEWSAPI_KEY}`)
       .then(r => r.json())
       .then(d => setArticles(d.articles));
   }, []);
 
-  // NEW: BEAUTIFUL CHART (added, not replacing anything)
+  // NEW: Live ticker search (Alpaca API – free)
+  useEffect(() => {
+    if (searchQuery.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    fetch(`https://api.alpaca.markets/v1beta1/assets/search?q=${encodeURIComponent(searchQuery)}`, {
+      headers: { 'APCA-API-KEY-ID': ALPACA_KEY, 'APCA-API-SECRET-KEY': ALPACA_SECRET }
+    })
+      .then(r => r.json())
+      .then(d => setSearchResults(d.assets.slice(0, 10)));  // Top 10 matches
+  }, [searchQuery]);
+
+  // NEW: Filter news for search matches
+  const filteredArticles = articles.filter(a =>
+    a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    a.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Chart (kept)
   useEffect(() => {
     if (!chartContainerRef.current) return;
     const chart = createChart(chartContainerRef.current, {
@@ -50,7 +71,6 @@ export default function Home() {
       upColor: '#10b981', downColor: '#ef4444',
       borderVisible: false, wickUpColor: '#10b981', wickDownColor: '#ef4444',
     });
-    // Sample data — we’ll make it live later
     candleSeries.setData([
       { time: '2025-04-01', open: 220, high: 230, low: 215, close: 228 },
       { time: '2025-04-02', open: 228, high: 240, low: 225, close: 238 },
@@ -80,12 +100,37 @@ export default function Home() {
       <main className="max-w-7xl mx-auto p-6">
         <h1 className="text-6xl font-bold text-center mb-8 text-emerald-400">FinFeed Pro</h1>
 
-        {/* Beautiful Chart */}
+        {/* NEW: Search Bar */}
+        <input
+          type="text"
+          placeholder="Search tickers (AAPL) or news..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full max-w-2xl mx-auto block px-6 py-4 rounded-xl bg-slate-800 border border-slate-700 focus:border-emerald-500 focus:outline-none text-lg mb-8"
+        />
+
+        {/* NEW: Ticker Search Results */}
+        {searchResults.length > 0 && (
+          <div className="mb-6">
+            <h2 className="text-xl font-bold mb-4 text-emerald-400">Tickers</h2>
+            <div className="grid gap-4 md:grid-cols-3">
+              {searchResults.map((asset, i) => (
+                <div key={i} className="p-4 bg-slate-800 rounded-lg border border-slate-700">
+                  <h3 className="font-bold text-emerald-400">{asset.symbol}</h3>
+                  <p className="text-slate-400">{asset.name}</p>
+                  <p className="text-sm text-slate-500">{asset.exchange || 'N/A'}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Chart */}
         <div ref={chartContainerRef} className="bg-slate-900 rounded-xl p-4 mb-12" />
 
-        {/* News Grid */}
+        {/* News Grid (filtered) */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {articles.slice(0, 12).map((a, i) => (
+          {filteredArticles.slice(0, 12).map((a, i) => (
             <a key={i} href={a.url} target="_blank" className="block p-6 bg-slate-800 rounded-xl hover:bg-slate-700 border border-slate-700">
               <h3 className="text-xl font-bold mb-2 text-emerald-400">{a.title}</h3>
               <p className="text-slate-300 mb-3 line-clamp-3">{a.description}</p>
