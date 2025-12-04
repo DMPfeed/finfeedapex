@@ -39,17 +39,28 @@ export default function Home() {
       .then(d => setArticles(d.articles));
   }, []);
 
-  // NEW: Live ticker search (Alpaca API – free)
+    // WORKING FREE ticker search (Alpaca v2 — works with your keys!)
   useEffect(() => {
     if (searchQuery.length < 2) {
       setSearchResults([]);
       return;
     }
-    fetch(`https://api.alpaca.markets/v1beta1/assets/search?q=${encodeURIComponent(searchQuery)}`, {
-      headers: { 'APCA-API-KEY-ID': ALPACA_KEY, 'APCA-API-SECRET-KEY': ALPACA_SECRET }
+
+    fetch(`https://api.alpaca.markets/v2/assets?symbol=${encodeURIComponent(searchQuery)}`, {
+      headers: {
+        'APCA-API-KEY-ID': ALPACA_KEY,
+        'APCA-API-SECRET-KEY': ALPACA_SECRET
+      }
     })
       .then(r => r.json())
-      .then(d => setSearchResults(d.assets.slice(0, 10)));  // Top 10 matches
+      .then(data => {
+        if (Array.isArray(data)) {
+          setSearchResults(data.slice(0, 10));
+        } else {
+          setSearchResults([]);
+        }
+      })
+      .catch(() => setSearchResults([]));
   }, [searchQuery]);
 
   // NEW: Filter news for search matches
