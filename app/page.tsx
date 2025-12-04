@@ -39,17 +39,16 @@ export default function Home() {
       .then(d => setArticles(d.articles));
   }, []);
 
-    // WORKING FREE ticker search (Alpaca v2 — works with your keys!)
+// WORKING FREE ticker search (Alpaca v2 — works with your keys!)
   useEffect(() => {
     if (searchQuery.length < 2) {
       setSearchResults([]);
       return;
     }
-
     fetch(`https://api.alpaca.markets/v2/assets?symbol=${encodeURIComponent(searchQuery)}`, {
       headers: {
-        'APCA-API-KEY-ID': ALPACA_KEY,
-        'APCA-API-SECRET-KEY': ALPACA_SECRET
+        'APCA-API-KEY-ID': 'PK6YURO5TC3PN3VP726YBXOWEZ',
+        'APCA-API-SECRET-KEY': '2EWqWKG2rLpPdxv4Vyoepzi8vwSiMAMoJFuWGDDgvF22'
       }
     })
       .then(r => r.json())
