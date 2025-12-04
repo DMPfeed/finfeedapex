@@ -16,13 +16,10 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('https://saurav.tech/NewsAPI/top-headlines/category/business/us.json')
-      .then(r => r.json())
-      .then(data => {
-        setArticles(data.articles);
-        setLoading(false);
-      });
-  }, []);
+  fetch('/api/cache')  // Your cached RSS endpoint
+    .then(r => r.json())
+    .then(data => setArticles(data.posts || []));
+}, []);
 
   const filtered = articles.filter((a: Article) =>
     a.title?.toLowerCase().includes(search.toLowerCase())
